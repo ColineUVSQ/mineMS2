@@ -710,7 +710,7 @@ fuseElem <- function(elems,dags,thresh=2,atoms=NULL){
 	####We get a list of all the possible error in the labels.
 	for(igl in 1:length(dags)){
 		g <- dags[[igl]]
-		if(is.null(g)||is.na(g)){
+		if(is.null(g) || (length(g) == 1 && is.na(g))){
 			next
 		}
 		adj_list <- adjacent_vertices(g,V(g),"out")
@@ -849,7 +849,7 @@ fuseElem <- function(elems,dags,thresh=2,atoms=NULL){
 	###Relabeling of the graph
 	for(igl in 1:length(dags)){
 		g <- dags[[igl]]
-		if(is.null(g)||is.na(g)){
+		if(is.null(g)||(length(g) == 1 && is.na(g))){
 			next
 		}
 		if(ecount(g)>0){
@@ -874,7 +874,7 @@ cleanupElems <- function(elems,dags,thresh){
   countv <- rep(0,nrow(elems))
   for(igl in 1:length(dags)){
     g <- dags[[igl]]
-    if(is.null(g)||is.na(g)){
+    if(is.null(g)||(length(g) == 1 && is.na(g))){
       next
     }
     eg_lab <- edge_attr(g,"lab")
@@ -894,7 +894,7 @@ cleanupElems <- function(elems,dags,thresh){
   ###Now removing the non frequent edges.
   for(igl in 1:length(dags)){
     g <- dags[[igl]]
-    if(is.null(g)||is.na(g)){
+    if(is.null(g)||(length(g) == 1 && is.na(g))){
       next
     }
     eg_lab <- edge_attr(g,"lab")

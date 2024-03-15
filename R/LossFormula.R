@@ -46,7 +46,22 @@ LossFormula <- function(formula=NULL,ref=NULL){
   
   if(!is.null(ref)) ref<- getAtomsFromRef(ref)
   
-  if(is.null(formula)||((length(formula)==1) & (is.na(formula)))||(nchar(formula)==0)){
+  if(!is.null(formula))
+  {
+    print(formula)
+    na_tot <- (nchar(formula) == 0)
+    na_c <- TRUE
+    for(i in na_tot)
+    {
+      if (is.na(i) || i == FALSE)
+      {
+        na_c <- FALSE
+      }
+    }
+  }
+  
+  if(is.null(formula)||((length(formula)==1) && (is.na(formula)))||(na_c)){
+
     if(is.null(ref)){
       lf@formula <- matrix(NA_integer_,nrow=0,ncol=0)
     }else{
