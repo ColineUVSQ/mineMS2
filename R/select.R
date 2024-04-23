@@ -342,10 +342,6 @@ find.patterns.class <- function(m2l,ids,type=c("f1","precision","size"),
 							miss=vf1["miss",pf1],size=vf1["size",pf1],stringsAsFactors = FALSE)
 
 	to_return <- to_return[do.call(order, c(decreasing = TRUE, data.frame(to_return[,criterion]))),]
-	if (length(ids) == 4 && ids[1] == 161 && ids[2] == 162 && ids[3] == 572 && ids[4] == 729)
-	{
-		print(to_return)
-	}
 
 	if(!returnall){
 		maxval <- to_return[1,criterion]

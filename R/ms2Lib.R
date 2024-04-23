@@ -331,7 +331,6 @@ ms2Lib <- function(x, suppInfos = NULL,ids = NULL, intThreshold = NULL, infosFro
 			
 			if(("id" %in% colnames(suppInfos)) &
 			   (is.null(ids))){
-				message("Igor est la")
 				mm2Ids(m2l) <- suppInfos[,"id"]
 			}
 			
