@@ -206,7 +206,7 @@ convert_formula <- function(form_vec){
 #' @export
 #' @param x May be one of the following
 #' \itemize{
-#' \item A character vector giving the path to a drictory full of readable format.
+#' \item A character vector giving the path to a directory full of readable format.
 #' \item A list of spectrum2 object which will be integrated directly.
 #' \item A single .mgfspectrum regrouping multiple files.
 #' }
@@ -254,7 +254,7 @@ ms2Lib <- function(x, suppInfos = NULL,ids = NULL, intThreshold = NULL, infosFro
 		if(length(x)==1){
 		###Single mgf file or dir
 			if(dir.exists(x)){
-				lfiles <- list.files(x,full.names = TRUE)
+				lfiles <- list.files(x,full.names = FALSE) ## not full path, only the name of the files
 				exts <- checkFormat(lfiles)
 				message("Reading ",length(exts)," files with format(s): ",unique(exts))
 				
@@ -301,6 +301,7 @@ ms2Lib <- function(x, suppInfos = NULL,ids = NULL, intThreshold = NULL, infosFro
 		if(is.null(lfiles)){
 			if(length(x)!=nrow(temp_df)){
 				temp_df$file <- rep(x,nrow(temp_df))
+				
 			}else{
 				temp_df$file <- x
 			}
@@ -310,14 +311,15 @@ ms2Lib <- function(x, suppInfos = NULL,ids = NULL, intThreshold = NULL, infosFro
 	}
 
 	temp_df$title <- make_initial_title(temp_df)
-
-	##Adding the supplementary information if necessary while check for an id fileds.
+	
+	##Adding the supplementary information if necessary while check for an id field.
 	if(!is.null(suppInfos)){
 		if(nrow(suppInfos)!= length(m2l@spectra)){
 			stop("The number of suppInfos rows (",nrow(suppInfos),
 				 ") do not match the number of spectra (",
 				 length(m2l@spectra),")furnished")
 		}else{
+			
 			if("file" %in% colnames(suppInfos)){
 				pm <- match(temp_df$file,suppInfos$file)
 				if(any(is.na(pm))) stop('"file" column furnished, but there was an error matching it against files.')
@@ -326,11 +328,13 @@ ms2Lib <- function(x, suppInfos = NULL,ids = NULL, intThreshold = NULL, infosFro
 			}else{
 				temp_df <- cbind(temp_df,suppInfos)
 			}
-
+			
 			if(("id" %in% colnames(suppInfos)) &
 			   (is.null(ids))){
+				message("Igor est la")
 				mm2Ids(m2l) <- suppInfos[,"id"]
 			}
+			
 		}
 
 	}else{
@@ -439,7 +443,6 @@ setMethod("mineClosedSubgraphs","ms2Lib",function(m2l, count = 2, sizeMin = 2, p
 		count <- 2
 	}
 
-
 	###Get the data.frame correspoding to the sizes.
 	processing <- sapply(mm2Dags(m2l),function(x){
 		ecount(x)>1
@@ -462,15 +465,16 @@ setMethod("mineClosedSubgraphs","ms2Lib",function(m2l, count = 2, sizeMin = 2, p
 		warning("sizeMin parameters set to ",sizeMin," risk of computational overhead.")
 	}
 	
-	###WE select the non empty graph to mine the patterns.
+	###We select the non empty graph to mine the patterns.
 	sel_g <- which(sapply(mm2Dags(m2l),ecount)!=0)
+
 	if(length(sel_g)==0) stop("No non-empty dags found.")
 
 	###Converting the dags into data.frame.
 	df_edges <- sapply(mm2Dags(m2l),fromIgraphToDf_edges,simplify = FALSE)[sel_g]
 	df_vertices <-sapply(mm2Dags(m2l),fromIgraphToDf_vertices,simplify = FALSE)[sel_g]
-	
-	###Mining the patterns.
+
+	###Mining the patterns.k
 	resRcpp <- mineClosedDags(df_vertices,df_edges,processing,count,kTree,sizeMin,precursor)
 
 	###Construction via fragPatternc constructor.
@@ -608,12 +612,12 @@ setMethod("plot", "ms2Lib",
 		  	  toccs <- x[y]@occurences[,1]
 		  	  if(is.null(title)) title <- y
 				return(plot(x[y],title = title,dags=mm2Dags(x),edgeLabels=(mm2EdgesLabels(x)),
-				     atoms=names(x@atoms),formula=get_formula(x)[toccs],...))
+				     atoms=names(x@atoms),formula=get_formula(x)[toccs],tkplot=TRUE,...))
 		  	}else if(rid[[1]]=="spectra"){
 		  		MSnbase:::plot_Spectrum2(x[y],full=TRUE,...)
 		  	}else if(rid[[1]]=="dags"){
 		  	  if(is.null(title)) title="Fragmentation Graph"
-		  		plot_dag(x[y],idx=y,edgeLabels=(mm2EdgesLabels(x)),atoms=x@atoms,title=title,...)
+				plot_dag(x[y],idx=y,edgeLabels=(mm2EdgesLabels(x)),atoms=x@atoms,title=title,...)
 		  		# stop("DAGS plotting not implemented at the moment.")
 		  	}else if(rid[[1]]=="losses"){
 		  		stop("Impossible to plot a loss")

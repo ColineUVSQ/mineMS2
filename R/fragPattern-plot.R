@@ -202,13 +202,14 @@ setMethod("plot", "fragPattern",
 		  		 atoms=c("C","H","O","N","S","P"),
 		  		 formula=NA_character_,
 		  		 mzdigits = 3,
-		  		 vertex_size = 55,
-		  		 vertex_label_cex = 0.7,
-		  		 edge_label_cex=0.7,
+		  		 vertex_size = 50,
+		  		 vertex_label_cex = 0.7, ## 1.2
+		  		 edge_label_cex=0.7, ## 0.9
 		  		 subNodes = NULL,
 		  		 tkplot = FALSE,
 		  		 ...) {
-		    if(is.null(edgeLabels)) stop("lease use the plot function through the ms2Lib object (ex :plot(m2l,'P15'))")
+
+		    if(is.null(edgeLabels)) stop("Please use the plot function through the ms2Lib object (ex :plot(m2l,'P15'))")
 		  	nodeLabel <- match.arg(nodeLabel)
 		  	edgeLabel <- match.arg(edgeLabel)
 		  	g <- mm2Graph(x)
@@ -255,7 +256,8 @@ setMethod("plot", "fragPattern",
 		  	} else{
 		  		plot.igraph(
 		  			g,
-		  			layout = (layout_with_sugiyama(g)$layout),
+		  			layout = (layout_with_sugiyama(g,maxiter=200)$layout),
+					#layout = layout_with_fr(g),
 		  			vertex.label = labels$vertices,
 		  			vertex.size = vertex_size,
 		  			vertex.label.cex=vertex_label_cex,

@@ -21,7 +21,7 @@ convertComponent <- function(comp,ids){
 #' @param m2l An ms2Lib object
 #' @param components A list containing the components to be explained.
 #' @param metric The metric used to match a component and the pattern occurence.
-#' @param ref_label A set of reference label to be used if the extracted component corresponds to an id over the position ofht e MS-MS spetra in the file
+#' @param ref_label A set of reference label to be used if the extracted component corresponds to an id over the position of the MS-MS spetra in the file
 #' @param threshold The threshold used to discriminate the dataset
 #' @param reduced Shall only the filtered patterns be considered
 #'
@@ -45,8 +45,7 @@ convertComponent <- function(comp,ids){
 findPatternsExplainingComponents <- function(m2l,components,metric=c("f1"),ref_label=NULL,threshold=NA_real_,
                                              reduced=TRUE){
 
-
-	###We first convert the ids of the compoentns to creect format.
+	###We first convert the ids of the components to correct format.
   if(!is.null(ref_label)){
     components <- sapply(components,function(x,ref){
       ref[x]

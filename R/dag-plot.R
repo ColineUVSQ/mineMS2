@@ -41,7 +41,7 @@ plot_dag <- function(g,idx=NULL,
 		  	txtlabs <- rep("", length(elabs))
 		  	if (edgeLab == "formula")
 		  	  txtlabs <- make_label_dag(edgeLabels[elabs,],mzdigit = mzdigits,atoms=names(atoms))
-		  		# txtlabs <- as.character(edgeLabels[elabs, "labs"])
+		  	  #txtlabs <- as.character(edgeLabels[elabs, "labs"])
 
 		  	###Node labels, nodes are always in the right order
 		  	nodeslabs <- sprintf(paste("%0.",mzdigits,"f",sep=""),vertex_attr(g,"mz"))
@@ -50,7 +50,7 @@ plot_dag <- function(g,idx=NULL,
 		  	if(is.null(title)){
 		  		title <- paste("Fragmentation graph ",sep="")
 		  		if(!is.null(idx)){
-		  			tilte <- paste(title,idx)
+		  			title <- paste(title,idx)
 		  		}
 		  	}
 

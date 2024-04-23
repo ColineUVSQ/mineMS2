@@ -48,7 +48,6 @@ LossFormula <- function(formula=NULL,ref=NULL){
   
   if(!is.null(formula))
   {
-    print(formula)
     na_tot <- (nchar(formula) == 0)
     na_c <- TRUE
     for(i in na_tot)

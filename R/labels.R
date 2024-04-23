@@ -382,7 +382,7 @@ annotateAFG <- function(fp,atoms,dags,elabs,oformula,edge_label="lab"){
   occs <- mm2Occurences(fp)
   atoms <- atoms
   
-  ####Getting tyhe vertices and the edges to pass, in the right order
+  ####Getting the vertices and the edges to pass, in the right order
   all_edges <- E(g)
   p_root <- tail_of(g,all_edges)==1
   e_origin <- all_edges[p_root]
@@ -449,13 +449,13 @@ makeLabelPattern <- function(p,atoms,dags,elabs,oformula,mzdigit=4){
     if(length(x)==0) return(def)
     as.character(x)
   },def=HIGH_MASS_LEGEND)
-  
-  ####If the formula is not solo or partial we add parenthesis
-  vpv <- apply(!vert$info[,1,drop=FALSE],1,any)
 
-  
-  labvert_formula[vpv] <- paste("(",labvert_formula[vpv],")",sep="")
-  
+  ####If the formula is not solo or partial we add parenthesis or 2+ formula
+  vpv <- apply(!vert$info[,1,drop=FALSE],1,any) ## vpv : logical vector : if TRUE : several formula
+
+  labvert_formula[vpv] <- paste("(",labvert_formula[vpv],")",sep="") ## add parenthesis
+  #labvert_formula[vpv] <- "2+ formula" ## put only 2+ formula
+
   labvert <- c("M",paste(labvert,labvert_formula,sep="\n"))
   
   
@@ -474,10 +474,12 @@ makeLabelPattern <- function(p,atoms,dags,elabs,oformula,mzdigit=4){
   pmz <-  labedge==HIGH_MASS_LEGEND
   labedge[pmz] <- sprintf(paste("%0.",mzdigit,"f",sep=""),annot$mz$e[pmz])
   
+  ## if several formula, put parenthesis or mz
   vp <- vp|((edg$multiple)&(!pmz))
   
-  labedge[vp] <- paste("(",labedge[vp],")",sep="")
-  
+  labedge[vp] <- paste("(",labedge[vp],")",sep="") ## parenthesis
+  #labedge[vp] <- sprintf(paste("%0.",mzdigit,"f",sep=""),annot$mz$e[vp]) ## mz
+ 
   ####For all the high mass label we put the mz diff over the formula.
   return(list(vertices=labvert,edges=labedge))
 }

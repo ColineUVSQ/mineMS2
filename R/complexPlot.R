@@ -4,7 +4,7 @@
 #'
 #' @param m2l An ms2Lib object
 #' @param ids The ids to be plotted or NULL if all the ids are supposed to be plot
-#' @param components An id giving the ocmponent of each spectrum to be plotted in first page.
+#' @param components An id giving the component of each spectrum to be plotted in first page.
 
 #' @param occurences Shall include the occurences be plotted aswell as the graph.
 #' @param full Shall the full patterns be plotted (it can take some times)
@@ -75,6 +75,7 @@ plotPatterns <- function(m2l,ids=NULL,components = NULL,occurences=TRUE,full=FAL
 				layout(1)
 				par(mar=opar)
 			}else{
+				
 				plot(m2l,id)
 			}
 		}

@@ -223,16 +223,16 @@ List formulaExtension(NumericVector masses,NumericVector mzlim, IntegerMatrix fo
 	int nf = formula.nrow();
 
 	int posnew=0;
-	IntegerMatrix new_formula = formula(Range(0,2*nf-1),Range(0,nelems-1));
-    //Adding hte current formula ot the found formula.
+	IntegerMatrix new_formula = formula(Range(0,nf-1),Range(0,nelems-1)); // change here (before:IntegerMatrix new_formula = formula(Range(0,2*nf-1),Range(0,nelems-1));)
+    //Adding the current formula to the found formula.
 	for(int i=0;i<nf;i++){
         IntegerVector tkey = formula(i , _);
-        std::string(tk) = to_str(tkey);
+        std::string tk = to_str(tkey);
         found_formula.insert(std::pair<std::string,int>(tk,i));
 	}
 
     int crow = nf;
-	//index of th newly found molecules
+	//index of the newly found molecules
 	int nitr = 0;
 	do{
 		if(nitr==100){
@@ -241,19 +241,20 @@ List formulaExtension(NumericVector masses,NumericVector mzlim, IntegerMatrix fo
 		}
 		int old_size = masses.size();
 		for(int fi = posnew ; fi < masses.size(); fi ++){
-
+			//printf("%d %f %lld %d %lld %d\n",fi, masses[fi], masses.size(), hatoms[fi], hatoms.size(), new_formula.nrow());
 			double mass = masses[fi];
 			for(int pos=fi;pos<masses.size();pos++){
 				double cmass = mass+masses[pos];
-
+				//printf("cmass: %f\n", cmass);
 				//We check if the mass is in the correct limit.
-				if((cmass>lim) |((hatoms[fi]+hatoms[pos])>chatom)){
+				if((cmass>lim) |((hatoms[fi]+hatoms[pos])>chatom)){ // pb ici parfois
+					//printf("boubou\n");
 					continue;
 				}
 
-				//We cheack that the ofrmula does not already exist
+				//We cheack that the formula does not already exist
 				IntegerVector nkey = new_formula(pos , _)+new_formula(fi , _);
-				std::string(skey) = to_str(nkey);
+				std::string skey = to_str(nkey);
 
 				const bool is_in_map = (found_formula.find(skey) != found_formula.end());
 				// Rcout << "p ";
@@ -276,10 +277,12 @@ List formulaExtension(NumericVector masses,NumericVector mzlim, IntegerMatrix fo
 						new_formula = temp_formula;
 					}
 
+
 					IntegerMatrix::Row n_f = new_formula(crow,_);
 					crow++;
 					n_f = new_formula(pos , _)+new_formula(fi , _);
 					masses.push_back(cmass);
+					hatoms.push_back(hatoms[fi]+hatoms[pos]); // NEW (pour avoir une info sur les hétéroatomes des masses ajoutées)
 
 				}
 
@@ -287,7 +290,7 @@ List formulaExtension(NumericVector masses,NumericVector mzlim, IntegerMatrix fo
 		}
 		posnew=old_size;
 	} while (posnew != masses.size());
-	//We return a list cotnaing the new formula and the new masses.
+	//We return a list containg the new formula and the new masses.
 	List to_return;
 	to_return["masses"] = masses[Range(0,crow-1)];
 	to_return["formula"] = new_formula(Range(0,crow-1),Range(0,nelems-1));

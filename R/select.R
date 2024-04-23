@@ -247,9 +247,27 @@ select.spectra.losses <- function(m2l,id){
 
 
 ###Return f1-score,precision,recall
-f1.score <- function(id,idsref,full=FALSE){
+f1.score <- function(id,idsref,m2l,full=FALSE){
+	## id : ens de spectres (de loss graphs) dans lesquels sont retrouvés un pattern particulier 
+	## idsref : ens de spectres qui appartiennent à une même composante de GNPS (clique, composante connexe ou arete de forte similarité)
+	
+
+	## adds: to take the right set of spectra
+	if("N" %in% colnames(m2l@spectraInfo))
+	{
+		spectres <- m2l@spectraInfo['N']
+		id <- spectres[rownames(spectres) %in% id,] 
+	}
+
+	#if(length(idsref) == 4 && idsref[1] == 161 && idsref[2] == 162 && idsref[3] == 572 && idsref[4] == 729 && length(id) == 4)
+	#{
+	#	message("Igor")
+	#	print(id)
+	#	print(idsref)
+	#}
 
 	###Calculating the intersection
+	
 	inter <- intersect(id,idsref)
 	if(length(inter)==0) return(rep(NA_real_,4))
 	if(full&(length(inter)!=length(id))) return(rep(NA_real_,4))
@@ -275,8 +293,6 @@ checkFTerms <- function(seq_terms){
 }
 
 
-
-
 #' Find biggest F1 score
 #'
 #' Given a list of molecules ids as a character or integer input, find the pattern maximizing the F1 score of
@@ -299,22 +315,20 @@ find.patterns.class <- function(m2l,ids,type=c("f1","precision","size"),
 								returnall=FALSE,full=TRUE,reduced=FALSE){
 
 	criterion <- checkFTerms(type)
-
-	idsp <- vrange(m2l,"P",reduced=reduced)
-
+	
+	idsp <- vrange(m2l,"P",reduced=reduced) ## all patterns
 	###The P is removed if needed.
 	if(is.character(ids)&&(startsWith(ids[1],"S"))) ids <- str_sub(ids,2)
 
-	ids <- as.numeric(ids)
-
+	ids <- as.numeric(ids) ## une composante (clique, composante connexe ...)
+	
 	###We find the best matching ones
 	vf1 <- sapply(idsp,function(x,idr,m2l,fullv){
-		c(f1.score(unique(m2l[x]@occurences[,1]),idr,full=fullv),vcount(m2l[x]@graph))
+		c(f1.score(unique(m2l[x]@occurences[,1]),idr,m2l,full=fullv),vcount(m2l[x]@graph))
 	},idr=ids,m2l=m2l,fullv=full)
-
+	
 	rownames(vf1) <- c("f1","precision","recall","miss","size")
-
-
+	
 	###Two cases, single maximum return or the full list of ranked values returneed.
 	to_return <- NULL
 
@@ -328,6 +342,11 @@ find.patterns.class <- function(m2l,ids,type=c("f1","precision","size"),
 							miss=vf1["miss",pf1],size=vf1["size",pf1],stringsAsFactors = FALSE)
 
 	to_return <- to_return[do.call(order, c(decreasing = TRUE, data.frame(to_return[,criterion]))),]
+	if (length(ids) == 4 && ids[1] == 161 && ids[2] == 162 && ids[3] == 572 && ids[4] == 729)
+	{
+		print(to_return)
+	}
+
 	if(!returnall){
 		maxval <- to_return[1,criterion]
 		posret <- 1

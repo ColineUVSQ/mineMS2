@@ -187,21 +187,21 @@ generateCol <- function(ncomp){
 findAllCliques <- function(net_gnps,minSize = 3,vname="cluster index"){
 	g <- induced_subgraph(net_gnps,V(net_gnps))
 
-	big_clique <- largest.cliques(g)[[1]]
+	big_clique <- largest_cliques(g)[[1]] ## first largest clique (clique maximum)
 
 	pos_list <- 1
-	list_cliques <- vector(mode="list",length=16)
+	list_cliques <- vector(mode="list",length=16) ## to store cliques
 
 	while(length(big_clique)>=minSize){
 
 		if(pos_list>length(list_cliques)){
 			list_cliques <- c(list_cliques,vector(mode="list",length=length(list_cliques)))
 		}
-		list_cliques[[pos_list]] <- vertex_attr(g,name=vname,index=big_clique)
+		list_cliques[[pos_list]] <- vertex_attr(g,name=vname,index=big_clique) ## name : attribute to retrieve, index : set of vertices
 		pos_list <- pos_list+1
 		###We remove the vertices
 		g <- delete_vertices(g,big_clique)
-		big_clique <- largest.cliques(g)[[1]]
+		big_clique <- largest_cliques(g)[[1]]
 	}
 
 	return(list_cliques[1:max(pos_list-1,1)])
@@ -224,8 +224,6 @@ findConnectedComponents <- function(net,minSize = 2,vname="cluster index",...){
 
 	###We remove all the components with a size inferior tp mineSize
 	lelem <- lelem[sapply(lelem,length)>=minSize]
-
-
 
 	lapply(lelem,function(x,vidx,vname,net){vertex_attr(net,vname,index=vidx[x])},
 		   vidx=Vlist,vname=vname,net=net)
@@ -264,25 +262,23 @@ findGNPSComponents <- function(net,minSize = 3,pairThreshold=0.9,vname="cluster 
 
 	###We check for all  the connected components that any of the connected_components is a clique.
 
-	###All the components are compared sequentiral.
-	seqSizeClique <- sapply(cliques,length)
-	seqSizeConnected <- sapply(connected_components,length)
+	###All the components are compared sequentially.
+	seqSizeClique <- sapply(cliques,length) ## cree une liste avec la taille des cliques
+	seqSizeConnected <- sapply(connected_components,length) ## cree une liste avec la taille des composantes connexes
 
 	maxSize <-max(seqSizeClique)
-
-
 
 	to_rm <- numeric(0)
 
 	###We compare all the clique of similar size
 	for(s in maxSize:1){
-		pCliques <- which(seqSizeClique==s)
+		pCliques <- which(seqSizeClique==s) ## indice(s) des cliques de taille s
 		if(length(pCliques)==0) next
-		pConnected <- which(seqSizeConnected==s)
+		pConnected <- which(seqSizeConnected==s) ## indice(s) des ccmposantes connexes de taille s
 		if(length(pConnected)==0) next
 
 
-		###Esle we doe the comparison.
+		###Else we do the comparison.
 		for(p1 in pCliques){
 			for(p2 in pConnected){
 				if(setequal(cliques[[p1]],connected_components[[p2]]))
@@ -294,6 +290,7 @@ findGNPSComponents <- function(net,minSize = 3,pairThreshold=0.9,vname="cluster 
 	###We filter the connected components list.
 
 	pComp <- 1:length(connected_components)
+
 	if(length(to_rm)!=0)	pComp <- pComp[-to_rm]
 
 	if(length(pComp)!=0) connected_components <- connected_components[pComp]
@@ -301,18 +298,22 @@ findGNPSComponents <- function(net,minSize = 3,pairThreshold=0.9,vname="cluster 
 
 	####Similarities passing the pairThreshold threshold are extracted.
 
-	###Remvoing all the vertex from cliques and 2 paris connected components
+	###Removing all the vertex from cliques and 2 pairs connected components
 	Vlist <- V(net)
 	Vattr <- vertex_attr(net,vname)
 
+  ## set of connected components of size 2
 	pairs <- connected_components[sapply(connected_components,length)==2]
 
+  # on concatène les cliques et les paires de sommets
 	pcliques <- unique(do.call("c",c(cliques,pairs)))
 
-	in_cliques <- match(Vattr,pcliques)
-	out_cliques <- which(is.na(in_cliques))
+	in_cliques <- match(Vattr,pcliques) ## vertices in cliques 
+	out_cliques <- which(is.na(in_cliques)) ## vertices not in cliques 
+
 
 	###All the edges are considered
+
 	E_edges <-  E(net)[ Vlist %--% Vlist[out_cliques] ]
 	E_edges <- E_edges[which(
 		as.numeric(edge_attr(net,eattr,E_edges))>pairThreshold)]
@@ -381,9 +382,10 @@ makeIdxTable <- function(components,maxVertices=70){
 annotateNetwork <- function(components,net,patterns,copy=TRUE,
 							keepattr = c("Compound_Name","SpectrumID","DefaultGroups",
 										 "cluster index","precursor mass"),sep_infos=","){
-  ##We always connect the ocmponent to the new referential
+
+  ##We always connect the component to the new referential
   components <- sapply(components,function(x,ref){
-    match(x,ref)},ref=vertex_attr(net,"id"),simplify = FALSE)
+    match(x,ref)},ref=vertex_attr(net,"pat"),simplify = FALSE)
   
 	if(!is.null(keepattr)){
 		if(copy) net <- igraph::induced_subgraph(net, V(net))
@@ -401,7 +403,7 @@ annotateNetwork <- function(components,net,patterns,copy=TRUE,
 
 	###We reorder every nodes order according to the definition
 	ids_gnps <- as.numeric(vertex_attr(net,name = ID_COL_GNPS))
-	
+
 	resComp <- makeIdxTable(components,vcount(net))
 	###Generating the col str.
 	colstr <- sapply(resComp,function(x,colseq,defcol){
@@ -416,12 +418,14 @@ annotateNetwork <- function(components,net,patterns,copy=TRUE,
 	ids <- sapply(patterns,function(x,sep){
 		paste(x[,"id"],collapse=sep)
 	},sep=sep_infos)
-	names(legstr) <- as.character(ids_gnps)
 
+	names(legstr) <- as.character(ids_gnps)
 
 	rlist <- list()
 	for(ne in colnames(patterns[[1]])){
-		rlist[[ne]] <- sapply(patterns,function(x,sep,cname){
+    if(ne == "id") ne2 <- "pat"
+    else ne2 <- ne
+		rlist[[ne2]] <- sapply(patterns,function(x,sep,cname){
 			tempt <- x[,cname]
 			if(is.numeric(tempt)) tempt <- sprintf("%0.2f",tempt)
 			paste(tempt,collapse=sep)
@@ -448,6 +452,8 @@ annotateNetwork <- function(components,net,patterns,copy=TRUE,
 	                       value = unlist(temp_leg[as.character(ids_gnps)]))
 	
 	id_comp_gnps <- as.character(seq_along(components))
+
+
 	temp_leg <- sapply(resComp,function(x,attstr,sep){
 	  if(length(x)==0) return("")
 	  return(paste(attstr[x],collapse = sep))
