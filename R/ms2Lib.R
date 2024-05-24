@@ -8,38 +8,47 @@ UNKNOWN_FORMULA <- NA_character_
 
 
 ###Accessors
+#'@export
 setMethod("mm2Spectra","ms2Lib",function(m2l){
 	return(m2l@spectra)
 })
 
+#'@export
 setMethod("mm2SpectraInfos","ms2Lib",function(m2l){
 	return(m2l@spectraInfo)
 })
 
+#'@export
 setMethod("mm2Dags","ms2Lib",function(m2l){
 	return(m2l@dags)
 })
 
+#'@export
 setMethod("mm2Ids","ms2Lib",function(m2l){
 	return(m2l@ids)
 })
 
+#'@export
 setMethod("mm2Atoms","ms2Lib",function(m2l){
   return(m2l@atoms)
 })
 
+#'@export
 setMethod("mm2EdgesLabels","ms2Lib",function(m2l){
 	return(m2l@losses)
 })
 
+#'@export
 setMethod("mm2NodesLabels","ms2Lib",function(m2l){
 	return(m2l@fragments)
 })
 
+#'@export
 setMethod("mm2Patterns","ms2Lib",function(m2l){
 	return(m2l@patterns)
 })
 
+#'@export
 setMethod("mm2ReducedPatterns","ms2Lib",function(m2l){
 	return(m2l@reducedPatterns)
 })
